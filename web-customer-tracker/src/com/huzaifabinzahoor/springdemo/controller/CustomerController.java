@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.huzaifabinzahoor.springdemo.dao.CustomerDAO;
 import com.huzaifabinzahoor.springdemo.entity.Customer;
 import com.huzaifabinzahoor.springdemo.service.CustomerService;
+import com.huzaifabinzahoor.springdemo.utility.SortUtils;
 
 @Controller
 @RequestMapping("/customer")
@@ -77,6 +78,37 @@ public class CustomerController {
 		// delete the customer
 		customerService.deleteCustomer(theId);
 		return "redirect:/customer/list";
+	}
+
+	@GetMapping("/search")
+	public String searchCustomers(@RequestParam("theSearchName") String theSearchName, Model theModel) {
+		// search customers from the service
+		List<Customer> theCustomers = customerService.searchCustomers(theSearchName);
+
+		// add the customers to the model
+		theModel.addAttribute("customer", theCustomers);
+		return "list-customer";
+	}
+
+	@GetMapping("/listBySorting")
+	public String listBySorting(Model theModel, @RequestParam(required = false) String sort) {
+
+		// get customers from the service
+		List<Customer> theCustomers = null;
+
+		// check for sort field
+		if (sort != null) {
+			int theSortField = Integer.parseInt(sort);
+			theCustomers = customerService.listBySorting(theSortField);
+		} else {
+			// no sort field provided ... default to sorting by last name
+			theCustomers = customerService.listBySorting(SortUtils.LAST_NAME);
+		}
+
+		// add the customers to the model
+		theModel.addAttribute("customer", theCustomers);
+
+		return "list-customer";
 	}
 
 }
